@@ -1,0 +1,128 @@
+﻿using Microsoft.Extensions.DependencyInjection;
+using Spectre.Console;
+using Spectre.Console.Cli;
+using Web.GetLatest.Application.DependencyWiring;
+using Web.GetLatest.Cli.DependencyWiring;
+using Web.GetLatest.Cli.Enums;
+using Web.GetLatest.Infrastructure.DependencyWiring;
+using Web.GetLatest.Infrastructure.Github;
+
+namespace Web.GetLatest.Cli;
+
+internal class Program
+{
+    private static async Task<int> Main(string[] args)
+    {
+        var verbose = args.Any(a => string.Equals(a, "-v", StringComparison.OrdinalIgnoreCase)
+                         || string.Equals(a, "--verbose", StringComparison.OrdinalIgnoreCase));
+
+        using var cancellationSource = new CancellationTokenSource();
+        void cancelKeyPressHandler(object? _, ConsoleCancelEventArgs e)
+        {
+            if (!cancellationSource.IsCancellationRequested)
+            {
+                e.Cancel = true;
+                cancellationSource.Cancel();
+            }
+            else
+            {
+                e.Cancel = false;
+            }
+        }
+        Console.CancelKeyPress += cancelKeyPressHandler;
+
+        try
+        {
+            var services = new ServiceCollection();
+
+            var registrar = new TypeRegistrar(services);
+            var app = new CommandApp(registrar);
+
+            app.Configure(config =>
+            {
+                services.RegisterLogging(verbose);
+                services.AddGithubClient();
+                services.AddLocalUserConfigRepository();
+
+                services.AddAppServices();
+                services.AddConfigurationProvider();
+
+                config.SetApplicationName("ghver");
+                config.PropagateExceptions();
+                config.ConfigureCommands();
+            });
+
+            return await app.RunAsync(args, cancellationSource.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            AnsiConsole.MarkupLine("\n[yellow]Operation aborted by user.[/]");
+            return CliStatusCodes.OperationCancelled.ToExitCode();
+        }
+        catch (Exception ex)
+        {
+            return HandleException(ex, verbose);
+        }
+        finally
+        {
+            Console.CancelKeyPress -= cancelKeyPressHandler;
+        }
+    }
+
+    private static int HandleException(Exception ex, bool verbose)
+    {
+        switch (ex)
+        {
+            case RateLimitExceededException rle:
+                if (verbose)
+                {
+                    AnsiConsole.WriteException(rle, ExceptionFormats.Default);
+                }
+                else
+                {
+                    AnsiConsole.MarkupLine($"[red]Rate limit exceeded.[/] The GitHub API limit resets at {Markup.Escape(rle.ResetTimeUtc.ToString("u"))} UTC.");
+                    AnsiConsole.MarkupLine("[grey]Tip: Wait until the reset time or use credentials / token with higher limits.[/]");
+                }
+
+                return CliStatusCodes.RateLimited.ToExitCode();
+
+            case GitHubNotFoundException gnf:
+                if (verbose)
+                {
+                    AnsiConsole.WriteException(gnf, ExceptionFormats.Default);
+                }
+                else
+                {
+                    AnsiConsole.MarkupLine($"[yellow]Not found:[/] {Markup.Escape(gnf.Message)}");
+                }
+
+                return CliStatusCodes.NotFound.ToExitCode();
+
+            case GitHubUnauthorizedException gu:
+                if (verbose)
+                {
+                    AnsiConsole.WriteException(gu, ExceptionFormats.Default);
+                }
+                else
+                {
+                    AnsiConsole.MarkupLine($"[red]Unauthorized:[/] {Markup.Escape(gu.Message)}");
+                    AnsiConsole.MarkupLine("[grey]Tip: Provide a valid personal access token (PAT) via -p or GHVER_PAT.[/]");
+                }
+
+                return CliStatusCodes.Unauthorized.ToExitCode();
+
+            default:
+                if (verbose)
+                {
+                    AnsiConsole.WriteException(ex, ExceptionFormats.Default);
+                }
+                else
+                {
+                    AnsiConsole.MarkupLine($"[red]Error:[/] {Markup.Escape(ex.Message)}");
+                    AnsiConsole.MarkupLine("[grey]Tip: Re-run with --verbose for full diagnostics.[/]");
+                }
+
+                return CliStatusCodes.Failure.ToExitCode();
+        }
+    }
+}

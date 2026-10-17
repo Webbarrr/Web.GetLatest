@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="README.md" />
+  </Folder>
+
+  <Folder Name="/src/">
+    <Project Path="src/Web.GetLatest.Application/Web.GetLatest.Application.csproj" Id="120e73f9-2f1c-40b5-8f58-c7683b0252c1" />
+    <Project Path="src/Web.GetLatest.Cli/Web.GetLatest.Cli.csproj" />
+    <Project Path="src/Web.GetLatest.Infrastructure/Web.GetLatest.Infrastructure.csproj" Id="39162b26-d7e3-4d73-86bc-cbcb5ec25387" />
+  </Folder>
+
+  <Folder Name="/tests/">
+    <Project Path="tests/Web.GetLatest.Cli.Tests/Web.GetLatest.Cli.Tests.csproj" />
+  </Folder>
+</Solution>
