@@ -59,7 +59,7 @@ public sealed class ResolveConfigurationTests
         // Assert
         result.Owner.Should().Be("userOwner");
         result.Repo.Should().Be("userRepo");
-        result.Pat.Should().BeNull();
+        result.Pat.Should().BeNullOrEmpty();
     }
 
     [Fact]
@@ -109,7 +109,7 @@ public sealed class ResolveConfigurationTests
         // Assert
         result.Owner.Should().Be("Webbarrr");
         result.Repo.Should().Be("Web.GetLatest");
-        result.Pat.Should().BeNull();
+        result.Pat.Should().BeNullOrEmpty();
     }
 
     [Fact]
