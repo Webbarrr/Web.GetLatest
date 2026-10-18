@@ -14,8 +14,8 @@ internal class Program
 {
     private static async Task<int> Main(string[] args)
     {
-        var verbose = args.Any(a => string.Equals(a, "-v", StringComparison.OrdinalIgnoreCase)
-                         || string.Equals(a, "--verbose", StringComparison.OrdinalIgnoreCase));
+        var trace = args.Any(a => string.Equals(a, "-t", StringComparison.OrdinalIgnoreCase)
+                         || string.Equals(a, "--trace", StringComparison.OrdinalIgnoreCase));
 
         using var cancellationSource = new CancellationTokenSource();
         void cancelKeyPressHandler(object? _, ConsoleCancelEventArgs e)
@@ -42,7 +42,7 @@ internal class Program
             app.SetDefaultCommand<GetLatestReleaseCommand>();
             app.Configure(config =>
             {
-                services.RegisterLogging(verbose);
+                services.RegisterLogging(trace);
                 services.AddGithubClient();
                 services.AddLocalUserConfigRepository();
 
@@ -63,7 +63,7 @@ internal class Program
         }
         catch (Exception ex)
         {
-            return HandleException(ex, verbose);
+            return HandleException(ex, trace);
         }
         finally
         {
@@ -71,12 +71,12 @@ internal class Program
         }
     }
 
-    private static int HandleException(Exception ex, bool verbose)
+    private static int HandleException(Exception ex, bool trace)
     {
         switch (ex)
         {
             case RateLimitExceededException rle:
-                if (verbose)
+                if (trace)
                 {
                     AnsiConsole.WriteException(rle, ExceptionFormats.Default);
                 }
@@ -89,7 +89,7 @@ internal class Program
                 return CliStatusCodes.RateLimited.ToExitCode();
 
             case GitHubNotFoundException gnf:
-                if (verbose)
+                if (trace)
                 {
                     AnsiConsole.WriteException(gnf, ExceptionFormats.Default);
                 }
@@ -101,7 +101,7 @@ internal class Program
                 return CliStatusCodes.NotFound.ToExitCode();
 
             case GitHubUnauthorizedException gu:
-                if (verbose)
+                if (trace)
                 {
                     AnsiConsole.WriteException(gu, ExceptionFormats.Default);
                 }
@@ -114,14 +114,14 @@ internal class Program
                 return CliStatusCodes.Unauthorized.ToExitCode();
 
             default:
-                if (verbose)
+                if (trace)
                 {
                     AnsiConsole.WriteException(ex, ExceptionFormats.Default);
                 }
                 else
                 {
                     AnsiConsole.MarkupLine($"[red]Error:[/] {Markup.Escape(ex.Message)}");
-                    AnsiConsole.MarkupLine("[grey]Tip: Re-run with --verbose for full diagnostics.[/]");
+                    AnsiConsole.MarkupLine("[grey]Tip: Re-run with --trace for full diagnostics.[/]");
                 }
 
                 return CliStatusCodes.Failure.ToExitCode();

@@ -6,11 +6,11 @@ namespace Web.GetLatest.Cli.DependencyWiring;
 
 public static class ServiceCollectionExtensions
 {
-    public static void RegisterLogging(this IServiceCollection services, bool verbose)
+    public static void RegisterLogging(this IServiceCollection services, bool trace)
     {
         var loggingState = new LoggingState
         {
-            MinimumLevel = verbose ? LogLevel.Debug : LogLevel.Warning
+            MinimumLevel = trace ? LogLevel.Trace : LogLevel.Warning
         };
 
         services.AddSingleton(loggingState);

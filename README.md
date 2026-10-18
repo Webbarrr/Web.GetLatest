@@ -35,10 +35,14 @@ dotnet run --project src/Web.GetLatest.Cli -- -o owner -r repo -p <personal-acce
   - -o|--owner <OWNER>  : Repository owner
   - -r|--repo <REPO>    : Repository name
   - -p|--pat <PAT>      : Personal Access Token (optional)
-  - -v|--verbose        : Verbose output (stack traces on error)
+  - -t|--trace          : Trace output (full exception stack traces and diagnostic logging)
 
-## Configuration sources and defaults
-- Local user config file (if present): %USERPROFILE%/.ghver/config.json on Windows or ~/.ghver/config.json on Linux/macOS. The file should contain JSON matching the expected shape (Owner, Repo).
+-## Configuration sources and defaults
+- Local user config file (if present): the CLI searches for a .ghver/config.json file in the following locations (in order):
+  1. %APPDATA%/.ghver/config.json (Windows Application Data)
+  2. %LOCALAPPDATA%/.ghver/config.json (Windows Local Application Data)
+  3. %USERPROFILE%/.ghver/config.json (legacy fallback)
+  On Unix-like systems this typically maps to ~/.ghver/config.json. The file should contain JSON with fields such as Owner, Repo and optionally Username.
 - Environment variables (take precedence over local config when command-line option is not provided):
   - GHVER_OWNER
   - GHVER_REPO
