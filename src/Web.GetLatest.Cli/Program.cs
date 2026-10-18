@@ -43,8 +43,7 @@ internal class Program
             app.Configure(config =>
             {
                 services.RegisterLogging(trace);
-                services.AddGithubClient();
-                services.AddLocalUserConfigRepository();
+                services.RegisterInfrastructure();
 
                 services.AddAppServices();
                 services.AddConfigurationProvider();

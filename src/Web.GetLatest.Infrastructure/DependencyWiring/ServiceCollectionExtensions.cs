@@ -9,7 +9,16 @@ namespace Web.GetLatest.Infrastructure.DependencyWiring;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddGithubClient(this IServiceCollection services)
+    public static IServiceCollection RegisterInfrastructure(this IServiceCollection services)
+    {
+        services.AddGithubClient();
+        services.AddLocalUserConfigRepository();
+        services.AddEnvironmentRepository();
+
+        return services;
+    }
+
+    private static IServiceCollection AddGithubClient(this IServiceCollection services)
     {
         services.AddHttpClient<IGitHubClient, GitHubClient>()
             .ConfigureHttpClient(client =>
@@ -29,9 +38,15 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddLocalUserConfigRepository(this IServiceCollection services)
+    private static IServiceCollection AddLocalUserConfigRepository(this IServiceCollection services)
     {
         services.AddSingleton<IUserConfigRepository, LocalUserConfigRepository>();
+        return services;
+    }
+
+    private static IServiceCollection AddEnvironmentRepository(this IServiceCollection services)
+    {
+        services.AddSingleton<IEnvironmentRepository, EnvironmentRepository>();
         return services;
     }
 }

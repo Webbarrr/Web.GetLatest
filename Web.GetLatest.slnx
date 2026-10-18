@@ -10,6 +10,7 @@
   </Folder>
 
   <Folder Name="/tests/">
+    <Project Path="tests/Web.GetLatest.Application.Tests.Unit/Web.GetLatest.Application.Tests.Unit.csproj" Id="83358803-b668-45cc-ad83-e777fb3347b6" />
     <Project Path="tests/Web.GetLatest.Cli.Tests/Web.GetLatest.Cli.Tests.csproj" />
   </Folder>
 </Solution>

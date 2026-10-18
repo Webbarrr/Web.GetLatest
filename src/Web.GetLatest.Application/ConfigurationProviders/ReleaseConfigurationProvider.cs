@@ -3,7 +3,10 @@ using Web.GetLatest.Application.Contracts.Infrastructure.UserConfig;
 
 namespace Web.GetLatest.Application.ConfigurationProviders;
 
-public class ReleaseConfigurationProvider(IUserConfigRepository configRepository) : IReleaseConfigurationProvider
+public sealed class ReleaseConfigurationProvider(
+    IUserConfigRepository configRepository,
+    IEnvironmentRepository environmentRepository
+    ) : IReleaseConfigurationProvider
 {
     private const string _defaultOwner = "Webbarrr";
     private const string _defaultRepo = "Web.GetLatest";
@@ -14,16 +17,16 @@ public class ReleaseConfigurationProvider(IUserConfigRepository configRepository
 
         string owner = request.Owner
                        ?? userConfig?.Owner
-                       ?? Environment.GetEnvironmentVariable("GHVER_OWNER")
+                       ?? environmentRepository.GetOwner()
                        ?? _defaultOwner;
 
         string repo = request.Repo
                       ?? userConfig?.Repo
-                      ?? Environment.GetEnvironmentVariable("GHVER_REPO")
+                      ?? environmentRepository.GetRepo()
                       ?? _defaultRepo;
 
         string? pat = request.Pat
-                      ?? Environment.GetEnvironmentVariable("GHVER_PAT");
+                      ?? environmentRepository.GetPersonalAccessToken();
 
         return new GetLatestReleaseRequest
         {
