@@ -22,6 +22,23 @@ dotnet build
 dotnet run --project src/Web.GetLatest.Cli -- [options]
 ```
 
+## Installing as a dotnet global tool
+
+```sh
+# Install latest published version
+dotnet tool install -g ghver
+
+# Install a specific version
+dotnet tool install -g ghver --version 1.2.3
+
+# Update
+dotnet tool update -g ghver
+
+# Uninstall
+dotnet tool uninstall -g ghver
+```
+
+
 ## Usage examples
 ```sh
 # Fetch the latest release for a specific repo
