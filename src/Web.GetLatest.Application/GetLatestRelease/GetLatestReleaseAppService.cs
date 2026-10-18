@@ -7,7 +7,7 @@ public interface IGetLatestReleaseAppService
     Task<GitHubReleaseResponse> GetLatestReleaseAsync(GetLatestReleaseRequest request, CancellationToken cancellationToken = default);
 }
 
-public class GetLatestReleaseAppService(IGitHubClient gitHubClient) : IGetLatestReleaseAppService
+public sealed class GetLatestReleaseAppService(IGitHubClient gitHubClient) : IGetLatestReleaseAppService
 {
     public async Task<GitHubReleaseResponse> GetLatestReleaseAsync(GetLatestReleaseRequest request, CancellationToken cancellationToken = default)
     {
