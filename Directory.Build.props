@@ -1,0 +1,7 @@
+<Project>
+  <PropertyGroup>
+	<TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+	<!-- Show per-test failures in the CI logs when tests fail -->
+	<TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
+  </PropertyGroup>
+</Project>
