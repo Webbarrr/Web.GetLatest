@@ -2,6 +2,7 @@
 using Spectre.Console;
 using Spectre.Console.Cli;
 using Web.GetLatest.Application.DependencyWiring;
+using Web.GetLatest.Cli.Commands;
 using Web.GetLatest.Cli.DependencyWiring;
 using Web.GetLatest.Cli.Enums;
 using Web.GetLatest.Infrastructure.DependencyWiring;
@@ -38,6 +39,7 @@ internal class Program
             var registrar = new TypeRegistrar(services);
             var app = new CommandApp(registrar);
 
+            app.SetDefaultCommand<GetLatestReleaseCommand>();
             app.Configure(config =>
             {
                 services.RegisterLogging(verbose);
