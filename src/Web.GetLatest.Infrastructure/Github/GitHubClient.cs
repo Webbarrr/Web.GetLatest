@@ -45,7 +45,9 @@ public sealed class GitHubClient(HttpClient httpClient) : IGitHubClient
         var releaseDtos = await response.Content.ReadFromJsonAsync<List<GitHubReleaseResponseDto>>(cancellationToken)
             ?? throw new InvalidOperationException("Failed to deserialize the GitHub releases response.");
 
-        return releaseDtos.Select(MapRelease).ToList();
+        return [.. releaseDtos
+            .Select(MapRelease)
+            .OrderByDescending(p => p.PublishedAt)];
     }
 
     private static void ValidateRepositoryRequest(string owner, string repo)
