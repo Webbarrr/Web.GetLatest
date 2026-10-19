@@ -28,6 +28,10 @@ public sealed class GetLatestReleaseCommand(
         [CommandOption("-p|--pat <PAT>")]
         [Description("Your GitHub Personal Access Token.")]
         public string? Pat { get; set; }
+
+        [CommandOption("-v|--version <VERSION_PREFIX>")]
+        [Description("Version prefix to filter by (for example: 2.5).")]
+        public string? Version { get; set; }
     }
 
     private sealed record UserConfig(string? Owner, string? Repo);
@@ -50,9 +54,11 @@ public sealed class GetLatestReleaseCommand(
 
         await console.Status()
             .Spinner(Spinner.Known.Dots)
-            .StartAsync($"Fetching latest release for [cyan]{targetRepo}[/]...", async ctx =>
+            .StartAsync(GetStatusMessage(targetRepo, settings.Version), async _ =>
             {
-                response = await getLatestReleaseAppService.GetLatestReleaseAsync(request, cancellationToken);
+                response = string.IsNullOrWhiteSpace(settings.Version)
+                    ? await getLatestReleaseAppService.GetLatestReleaseAsync(request, cancellationToken)
+                    : await getLatestReleaseAppService.GetLatestReleaseByVersionAsync(request, settings.Version, cancellationToken);
             });
 
         if (response is null)
@@ -67,5 +73,15 @@ public sealed class GetLatestReleaseCommand(
         console.WriteLine();
 
         return (int)CliStatusCodes.Success;
+    }
+
+    private static string GetStatusMessage(string targetRepo, string? versionPrefix)
+    {
+        if (string.IsNullOrWhiteSpace(versionPrefix))
+        {
+            return $"Fetching latest release for [cyan]{targetRepo}[/]...";
+        }
+
+        return $"Fetching latest release for [cyan]{targetRepo}[/] matching [yellow]v{Markup.Escape(versionPrefix.Trim().TrimStart('v', 'V'))}.*[/]...";
     }
 }
