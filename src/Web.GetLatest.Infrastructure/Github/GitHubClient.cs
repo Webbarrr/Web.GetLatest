@@ -10,7 +10,9 @@ public sealed class GitHubClient(HttpClient httpClient) : IGitHubClient
 {
     public async Task<GitHubReleaseResponse> GetLatestReleaseAsync(GetLatestReleaseRequest request, CancellationToken cancellationToken = default)
     {
-        ValidateRequest(request);
+        ArgumentNullException.ThrowIfNull(request);
+
+        ValidateRepositoryRequest(request.Owner, request.Repo);
 
         var relativeUrl = $"repos/{request.Owner}/{request.Repo}/releases/latest";
 
@@ -23,19 +25,43 @@ public sealed class GitHubClient(HttpClient httpClient) : IGitHubClient
 
         return releaseDto is null
             ? throw new InvalidOperationException("Failed to deserialize the GitHub release response.")
-            : new GitHubReleaseResponse
-            {
-                TagName = releaseDto.TagName,
-                Name = releaseDto.Name,
-                PublishedAt = releaseDto.PublishedAt
-            };
+            : MapRelease(releaseDto);
     }
 
-    private static void ValidateRequest(GetLatestReleaseRequest request)
+    public async Task<IReadOnlyList<GitHubReleaseResponse>> GetReleasesAsync(GetPagedReleasesRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
-        ArgumentException.ThrowIfNullOrWhiteSpace(request.Owner);
-        ArgumentException.ThrowIfNullOrWhiteSpace(request.Repo);
+
+        ValidateRepositoryRequest(request.Owner, request.Repo);
+        ValidatePaging(request.PageNumber, request.PageSize);
+
+        var relativeUrl = $"repos/{request.Owner}/{request.Repo}/releases?page={request.PageNumber}&per_page={request.PageSize}";
+
+        using var httpRequest = CreateRequest(HttpMethod.Get, relativeUrl, request.Pat);
+        using var response = await httpClient.SendAsync(httpRequest, cancellationToken);
+
+        await EnsureSuccessOrThrowAsync(response, request.Owner, request.Repo, cancellationToken);
+
+        var releaseDtos = await response.Content.ReadFromJsonAsync<List<GitHubReleaseResponseDto>>(cancellationToken)
+            ?? throw new InvalidOperationException("Failed to deserialize the GitHub releases response.");
+
+        return releaseDtos.Select(MapRelease).ToList();
+    }
+
+    private static void ValidateRepositoryRequest(string owner, string repo)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(owner);
+        ArgumentException.ThrowIfNullOrWhiteSpace(repo);
+    }
+
+    private static void ValidatePaging(int pageNumber, int pageSize)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageNumber);
+
+        if (pageSize is <= 0 or > 100)
+        {
+            throw new ArgumentOutOfRangeException(nameof(pageSize), pageSize, "Page size must be between 1 and 100.");
+        }
     }
 
     private static HttpRequestMessage CreateRequest(HttpMethod method, string relativeUrl, string? pat)
@@ -116,4 +142,11 @@ public sealed class GitHubClient(HttpClient httpClient) : IGitHubClient
 
         return resetUtc;
     }
+
+    private static GitHubReleaseResponse MapRelease(GitHubReleaseResponseDto releaseDto) => new()
+    {
+        TagName = releaseDto.TagName,
+        Name = releaseDto.Name,
+        PublishedAt = releaseDto.PublishedAt
+    };
 }
