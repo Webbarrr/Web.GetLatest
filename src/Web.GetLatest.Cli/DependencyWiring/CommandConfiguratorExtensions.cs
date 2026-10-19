@@ -17,7 +17,9 @@ public static class CommandConfiguratorExtensions
             "release",
             "release --owner Webbarrr --repo Web.GetLatest",
             "release -o Webbarrr -r Web.GetLatest",
-            "release -p ghp_abc123xyz"
+            "release -p ghp_abc123xyz",
+            "release -o Webbarrr -r Web.GetLatest -v 2.5",
+            "release --owner Webbarrr --repo Web.GetLatest --version 2.5"
         ];
 
         var command = configurator.AddCommand<GetLatestReleaseCommand>("release")

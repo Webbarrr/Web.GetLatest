@@ -7,6 +7,7 @@ CLI name: `ghver`
 Key features
 - Resolve repository and credentials from: command-line options, local user config (~/.ghver/config.json), or environment variables
 - Fetch latest release metadata from the GitHub Releases API
+- Filter releases by version prefix (for example: 2.5 -> latest v2.5.* release)
 - Nicely formatted console output using Spectre.Console
 
 ## Supported platforms
@@ -46,15 +47,22 @@ dotnet run --project src/Web.GetLatest.Cli -- -o owner -r repo
 
 # Provide GitHub credentials (PAT) for private repos or higher rate limits
 dotnet run --project src/Web.GetLatest.Cli -- -o owner -r repo -p <personal-access-token>
+
+# Fetch the latest release that matches v2.5.*
+dotnet run --project src/Web.GetLatest.Cli -- -o owner -r repo -v 2.5
+
+# Long option variant
+dotnet run --project src/Web.GetLatest.Cli -- --owner owner --repo repo --version 2.5
 ```
 
 ## Short flags and tips:
   - -o|--owner <OWNER>  : Repository owner
   - -r|--repo <REPO>    : Repository name
   - -p|--pat <PAT>      : Personal Access Token (optional)
+  - -v|--version <VER>  : Version prefix filter (for example: 2.5 -> v2.5.*)
   - -t|--trace          : Trace output (full exception stack traces and diagnostic logging)
 
--## Configuration sources and defaults
+## Configuration sources and defaults
 - Local user config file (if present): the CLI searches for a .ghver/config.json file in the following locations (in order):
   1. %APPDATA%/.ghver/config.json (Windows Application Data)
   2. %LOCALAPPDATA%/.ghver/config.json (Windows Local Application Data)
