@@ -42,6 +42,10 @@ dotnet tool uninstall -g ghver
 
 ## Usage examples
 ```sh
+# If installed as a global tool
+ghver -o owner -r repo
+
+# From local
 # Fetch the latest release for a specific repo
 dotnet run --project src/Web.GetLatest.Cli -- -o owner -r repo
 
