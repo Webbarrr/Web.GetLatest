@@ -26,7 +26,7 @@ public sealed class GetLatestReleaseCommand(
         public string? Repo { get; set; }
 
         [CommandOption("-p|--pat <PAT>")]
-        [Description("Your GitHub Personal Access Token.")]
+        [Description("GitHub Personal Access Token (prefer GHVER_PAT; command-line values may be exposed).")]
         public string? Pat { get; set; }
 
         [CommandOption("-v|--version <VERSION_PREFIX>")]

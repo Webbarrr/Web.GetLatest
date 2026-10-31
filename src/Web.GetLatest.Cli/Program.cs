@@ -107,7 +107,7 @@ internal class Program
                 else
                 {
                     AnsiConsole.MarkupLine($"[red]Unauthorized:[/] {Markup.Escape(gu.Message)}");
-                    AnsiConsole.MarkupLine("[grey]Tip: Provide a valid personal access token (PAT) via -p or GHVER_PAT.[/]");
+                    AnsiConsole.MarkupLine("[grey]Tip: Set GHVER_PAT to provide a valid personal access token (PAT). Avoid -p because command-line values may be exposed.[/]");
                 }
 
                 return CliStatusCodes.Unauthorized.ToExitCode();
