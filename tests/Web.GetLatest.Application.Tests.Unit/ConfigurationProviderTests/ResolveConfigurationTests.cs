@@ -13,12 +13,16 @@ public sealed class ResolveConfigurationTests
     {
         // Arrange
         var configRepo = A.Fake<IUserConfigRepository>();
-        A.CallTo(() => configRepo.LoadConfig()).Returns(null);
+        A.CallTo(() => configRepo.LoadConfig()).Returns(new UserConfigResponse
+        {
+            Owner = "configOwner",
+            Repo = "configRepo"
+        });
 
         var envRepo = A.Fake<IEnvironmentRepository>();
-        A.CallTo(() => envRepo.GetOwner()).Returns(null);
-        A.CallTo(() => envRepo.GetRepo()).Returns(null);
-        A.CallTo(() => envRepo.GetPersonalAccessToken()).Returns(null);
+        A.CallTo(() => envRepo.GetOwner()).Returns("envOwner");
+        A.CallTo(() => envRepo.GetRepo()).Returns("envRepo");
+        A.CallTo(() => envRepo.GetPersonalAccessToken()).Returns("envPat");
 
         var provider = new ReleaseConfigurationProvider(configRepo, envRepo);
 
@@ -84,6 +88,66 @@ public sealed class ResolveConfigurationTests
         // Assert
         result.Owner.Should().Be("envOwner");
         result.Repo.Should().Be("envRepo");
+        result.Pat.Should().Be("envPat");
+    }
+
+    [Fact]
+    public void ResolveConfiguration_UsesEnvironmentOverUserConfig_WhenRequestMissing()
+    {
+        // Arrange
+        var configRepo = A.Fake<IUserConfigRepository>();
+        A.CallTo(() => configRepo.LoadConfig()).Returns(new UserConfigResponse
+        {
+            Owner = "configOwner",
+            Repo = "configRepo"
+        });
+
+        var envRepo = A.Fake<IEnvironmentRepository>();
+        A.CallTo(() => envRepo.GetOwner()).Returns("envOwner");
+        A.CallTo(() => envRepo.GetRepo()).Returns("envRepo");
+        A.CallTo(() => envRepo.GetPersonalAccessToken()).Returns("envPat");
+
+        var provider = new ReleaseConfigurationProvider(configRepo, envRepo);
+
+        // Act
+        var result = provider.ResolveConfiguration(new GetLatestReleaseResolverRequest());
+
+        // Assert
+        result.Owner.Should().Be("envOwner");
+        result.Repo.Should().Be("envRepo");
+        result.Pat.Should().Be("envPat");
+    }
+
+    [Fact]
+    public void ResolveConfiguration_TreatsEmptyAndWhitespaceValuesAsMissing()
+    {
+        // Arrange
+        var configRepo = A.Fake<IUserConfigRepository>();
+        A.CallTo(() => configRepo.LoadConfig()).Returns(new UserConfigResponse
+        {
+            Owner = "configOwner",
+            Repo = "configRepo"
+        });
+
+        var envRepo = A.Fake<IEnvironmentRepository>();
+        A.CallTo(() => envRepo.GetOwner()).Returns("   ");
+        A.CallTo(() => envRepo.GetRepo()).Returns(string.Empty);
+        A.CallTo(() => envRepo.GetPersonalAccessToken()).Returns("envPat");
+
+        var provider = new ReleaseConfigurationProvider(configRepo, envRepo);
+        var request = new GetLatestReleaseResolverRequest
+        {
+            Owner = string.Empty,
+            Repo = "\t",
+            Pat = "   "
+        };
+
+        // Act
+        var result = provider.ResolveConfiguration(request);
+
+        // Assert
+        result.Owner.Should().Be("configOwner");
+        result.Repo.Should().Be("configRepo");
         result.Pat.Should().Be("envPat");
     }
 

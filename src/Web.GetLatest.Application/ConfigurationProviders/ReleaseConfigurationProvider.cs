@@ -15,18 +15,21 @@ public sealed class ReleaseConfigurationProvider(
     {
         var userConfig = configRepository.LoadConfig();
 
-        string owner = request.Owner
-                       ?? userConfig?.Owner
-                       ?? environmentRepository.GetOwner()
-                       ?? _defaultOwner;
+        string owner = FirstNonBlank(
+            request.Owner,
+            environmentRepository.GetOwner(),
+            userConfig?.Owner,
+            _defaultOwner)!;
 
-        string repo = request.Repo
-                      ?? userConfig?.Repo
-                      ?? environmentRepository.GetRepo()
-                      ?? _defaultRepo;
+        string repo = FirstNonBlank(
+            request.Repo,
+            environmentRepository.GetRepo(),
+            userConfig?.Repo,
+            _defaultRepo)!;
 
-        string? pat = request.Pat
-                      ?? environmentRepository.GetPersonalAccessToken();
+        string? pat = FirstNonBlank(
+            request.Pat,
+            environmentRepository.GetPersonalAccessToken());
 
         return new GetLatestReleaseRequest
         {
@@ -34,5 +37,10 @@ public sealed class ReleaseConfigurationProvider(
             Repo = repo,
             Pat = pat
         };
+    }
+
+    private static string? FirstNonBlank(params string?[] values)
+    {
+        return values.FirstOrDefault(value => !string.IsNullOrWhiteSpace(value));
     }
 }

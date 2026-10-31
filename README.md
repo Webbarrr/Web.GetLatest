@@ -72,7 +72,7 @@ dotnet run --project src/Web.GetLatest.Cli -- --owner owner --repo repo --versio
   2. %LOCALAPPDATA%/.ghver/config.json (Windows Local Application Data)
   3. %USERPROFILE%/.ghver/config.json (legacy fallback)
   On Unix-like systems this typically maps to ~/.ghver/config.json. The file should contain JSON with fields such as Owner, Repo and optionally Username.
-- Environment variables (take precedence over local config when command-line option is not provided):
+- Configuration precedence is command-line option, environment variable, local config, then built-in default:
   - GHVER_OWNER
   - GHVER_REPO
   - GHVER_PAT
