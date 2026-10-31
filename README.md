@@ -49,8 +49,11 @@ ghver -o owner -r repo
 # Fetch the latest release for a specific repo
 dotnet run --project src/Web.GetLatest.Cli -- -o owner -r repo
 
-# Provide GitHub credentials (PAT) for private repos or higher rate limits
-dotnet run --project src/Web.GetLatest.Cli -- -o owner -r repo -p <personal-access-token>
+# Provide GitHub credentials (PAT) for private repos or higher rate limits.
+# Set GHVER_PAT through your shell's environment/secret-management facilities;
+# do not replace the placeholder in a command that will be saved in shell history.
+$env:GHVER_PAT = '<personal-access-token>'
+dotnet run --project src/Web.GetLatest.Cli -- -o owner -r repo
 
 # Fetch the latest release that matches v2.5.*
 dotnet run --project src/Web.GetLatest.Cli -- -o owner -r repo -v 2.5
@@ -62,7 +65,7 @@ dotnet run --project src/Web.GetLatest.Cli -- --owner owner --repo repo --versio
 ## Short flags and tips:
   - -o|--owner <OWNER>  : Repository owner
   - -r|--repo <REPO>    : Repository name
-  - -p|--pat <PAT>      : Personal Access Token (optional)
+  - -p|--pat <PAT>      : Personal Access Token (optional; may be exposed in process listings/history)
   - -v|--version <VER>  : Version prefix filter (for example: 2.5 -> v2.5.*)
   - -t|--trace          : Trace output (full exception stack traces and diagnostic logging)
 
@@ -72,11 +75,13 @@ dotnet run --project src/Web.GetLatest.Cli -- --owner owner --repo repo --versio
   2. %LOCALAPPDATA%/.ghver/config.json (Windows Local Application Data)
   3. %USERPROFILE%/.ghver/config.json (legacy fallback)
   On Unix-like systems this typically maps to ~/.ghver/config.json. The file should contain JSON with fields such as Owner, Repo and optionally Username.
+- For credentials, prefer the `GHVER_PAT` environment variable or an environment-backed secret-management tool. The CLI does not echo the token; normal output only indicates whether one is configured.
 - Configuration precedence is command-line option, environment variable, local config, then built-in default:
   - GHVER_OWNER
   - GHVER_REPO
   - GHVER_PAT
 - If owner/repo are not provided anywhere, defaults are used: Owner = Webbarrr, Repo = Web.GetLatest
+- The `-p|--pat` option remains available as a convenience, but command-line arguments can be visible in shell history, process listings, terminal recordings, or CI diagnostics. Avoid it when possible.
 
 ## Development
 
