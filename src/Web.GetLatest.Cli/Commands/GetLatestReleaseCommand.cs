@@ -77,11 +77,13 @@ public sealed class GetLatestReleaseCommand(
 
     private static string GetStatusMessage(string targetRepo, string? versionPrefix)
     {
+        string escapedTargetRepo = Markup.Escape(targetRepo);
+
         if (string.IsNullOrWhiteSpace(versionPrefix))
         {
-            return $"Fetching latest release for [cyan]{targetRepo}[/]...";
+            return $"Fetching latest release for [cyan]{escapedTargetRepo}[/]...";
         }
 
-        return $"Fetching latest release for [cyan]{targetRepo}[/] matching [yellow]v{Markup.Escape(versionPrefix.Trim().TrimStart('v', 'V'))}.*[/]...";
+        return $"Fetching latest release for [cyan]{escapedTargetRepo}[/] matching [yellow]v{Markup.Escape(versionPrefix.Trim().TrimStart('v', 'V'))}.*[/]...";
     }
 }
