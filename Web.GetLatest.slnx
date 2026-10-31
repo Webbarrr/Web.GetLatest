@@ -11,5 +11,6 @@
 
   <Folder Name="/tests/">
     <Project Path="tests/Web.GetLatest.Application.Tests.Unit/Web.GetLatest.Application.Tests.Unit.csproj" Id="0159fa42-0d82-48db-b61b-c89d6aae4627" />
+    <Project Path="tests/Web.GetLatest.Cli.Tests.Unit/Web.GetLatest.Cli.Tests.Unit.csproj" />
   </Folder>
 </Solution>

@@ -1,4 +1,4 @@
-﻿using Spectre.Console;
+using Spectre.Console;
 using Spectre.Console.Rendering;
 using Web.GetLatest.Application.Contracts.Infrastructure.GetLatestRelease;
 
@@ -21,16 +21,19 @@ internal sealed class ReleasePanel : IRenderable
     private Panel CreatePanel()
     {
         string formattedDate = _response.PublishedAt.ToString("yyyy-MM-dd HH:mm");
+        string tagName = Markup.Escape(_response.TagName);
+        string releaseName = Markup.Escape(_response.Name);
+        string targetRepo = Markup.Escape(_targetRepo);
 
         var panelContent = new Markup(
-            $"[bold green]Version (Tag):[/] {_response.TagName}\n" +
-            $"[bold]Release Name:[/] {_response.Name}\n" +
+            $"[bold green]Version (Tag):[/] {tagName}\n" +
+            $"[bold]Release Name:[/] {releaseName}\n" +
             $"[bold grey]Published At:[/] {formattedDate}"
         );
 
         return new Panel(panelContent)
         {
-            Header = new PanelHeader($"[bold skyblue1] {_targetRepo} [/]"),
+            Header = new PanelHeader($"[bold skyblue1] {targetRepo} [/]"),
             Border = BoxBorder.Rounded,
             BorderStyle = new Style(Color.SkyBlue1),
             Padding = new Padding(2, 1, 2, 1)
